@@ -7,3 +7,6 @@ create_random_file: create_random_file.cc library.o
 
 get_histogram: get_histogram.cc library.o
 	$(CC) -o $@ $< library.o
+
+clean:
+	-rm -f *.o
