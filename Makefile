@@ -9,4 +9,4 @@ get_histogram: get_histogram.cc library.o
 	$(CC) -o $@ $< library.o
 
 clean:
-	-rm -f *.o
+	-rm -f *.o .*swp .*swo
