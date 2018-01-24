@@ -15,6 +15,7 @@ int main (int argc, char *argv[]){
     total_bytes_read = ftell(fp);
     rewind(fp);
     get_histogram(fp, hist, block_size, &milliseconds, &total_bytes_read);
+    fclose(fp);
     for (int i = 0; i < 26; i++) {
         printf("%c: %ld\n", 'A' + i, hist[i]);
     }

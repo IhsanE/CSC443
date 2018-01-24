@@ -26,13 +26,14 @@ int get_histogram(
     long *milliseconds,
     long *total_bytes_read
 ) {
+    memset(hist, 0, sizeof(long) * 26);
     int unread_chars = *total_bytes_read;
     char buf[block_size];
     char *p_buf = buf;
     long *p_hist = hist;
     struct timeb t;
     while (unread_chars > 0) {
-        bzero(buf, block_size);
+        memset(buf, 0, block_size);
         ftime(&t);
         long t_before_ms = t.time * 1000 + t.millitm;
         fread(buf, 1, block_size, fp);
@@ -42,5 +43,9 @@ int get_histogram(
         compute_histogram(p_hist, p_buf, block_size);
         unread_chars -= block_size;
     }
-    fclose(fp);
+
+    if (ferror(fp)) {
+        *milliseconds = -1;
+    }
+    return *milliseconds;
 }
