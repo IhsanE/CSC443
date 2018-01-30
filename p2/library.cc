@@ -16,6 +16,7 @@ int fixed_len_sizeof(Record *record){
 }
 void fixed_len_write(Record *record, void *buf){
     void *buff_reference = buf;
+    // Append characters from record into a buffer
     for (Record::iterator iter = (*record).begin(); iter != (*record).end(); iter++) {
         size_t record_size = strlen(*iter);
         memcpy(buff_reference, *iter, record_size);
@@ -23,14 +24,22 @@ void fixed_len_write(Record *record, void *buf){
     }
 }
 void fixed_len_read(void *buf, int size, Record *record) {
-
+    void *buff_reference = buf;
+    // Create a temp char buffer to read bytes into
+    // Add this buffer to our record vector
+    for (int i = 0; i < size/ATTR_SIZE; i++) {
+        char* temp_record_buff = new char[size];
+        memcpy(temp_record_buff, buff_reference, ATTR_SIZE);
+        (*record).push_back(temp_record_buff);
+        buff_reference = (char *)buff_reference + ATTR_SIZE;
+    }
 }
 
 int main () {
     Record r = Record();
-    char* char_array = "wtf";
+    char* char_array = "wtf       ";
     r.push_back(char_array);
-    r.push_back("alsdkfjakldjfl");
+    r.push_back("lsdkfjakll");
     cout << "Original Record:" << endl;
     for (Record::iterator iter = (r).begin(); iter != (r).end(); iter++) {
         cout << *iter << endl;
