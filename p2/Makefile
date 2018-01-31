@@ -1,7 +1,13 @@
 CC = g++
 
 library.o: library.cc library.h
-		$(CC) -o library.o -c library.cc
+	$(CC) -o library.o -c library.cc
+
+experiment_1_1: experiment_1_1.cc library.o
+	$(CC) -o $@ $< library.o
+
+experiment_2_2: experiment_2_2.cc library.o
+	$(CC) -o $@ $< library.o
 
 csv2heapfile: csv2heapfile.cc library.o
 	$(CC) -o $@ $< library.o

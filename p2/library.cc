@@ -35,29 +35,23 @@ void fixed_len_read(void *buf, int size, Record *record) {
     }
 }
 
-int main () {
-    Record r = Record();
-    char* char_array = "wtf       ";
-    r.push_back(char_array);
-    r.push_back("lsdkfjakll");
-    cout << "Original Record:" << endl;
-    for (Record::iterator iter = (r).begin(); iter != (r).end(); iter++) {
-        cout << *iter << endl;
-    }
-    int size = fixed_len_sizeof(&r);
-    cout << "Below is the size of the vector\n";
-    cout << size << endl;
+void init_fixed_len_page(Page *page, int page_size, int slot_size) {
+    page->data = malloc(page_size);
+    page->page_size = page_size;
+    page->slot_size = slot_size;
 
-    void* buffer = malloc(size);;
-    Record r_read = Record();
+    int num_slots = page_size/slot_size;
+    void *directory_start = (page->data + slot_size*(num_slots - 1));
+    // init directory slot to all 0
+    memset(directory_start, 0, slot_size);
 
-    fixed_len_write(&r, buffer);
-    cout << "Below is the written buffer (shouldnt be legible)\n";
-    cout << buffer << endl;
-
-    fixed_len_read(buffer, size, &r_read);
-    cout << "Read In Record:" << endl;
-    for (Record::iterator iter = (r_read).begin(); iter != (r_read).end(); iter++) {
-        cout << *iter << endl;
-    }
+    // init first int size bits to represent the number of slots in page
+    *((int*)directory_start) = num_slots;
+    page->directory = directory_start;
 }
+
+int fixed_len_page_capacity(Page *page);
+int fixed_len_page_freeslots(Page *page);
+int add_fixed_len_page(Page *page, Record *r);
+void write_fixed_len_page(Page *page, int slot, Record *r);
+void read_fixed_len_page(Page *page, int slot, Record *r);
