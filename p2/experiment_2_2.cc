@@ -16,4 +16,5 @@ int main () {
     cout << *((int *)page->directory) << endl;
     cout << page << endl;
     cout << fixed_len_page_freeslots(page) << endl;
+    cout << find_first_free_slot(page) << endl;
 }

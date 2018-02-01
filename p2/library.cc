@@ -69,6 +69,7 @@ void init_fixed_len_page(Page *page, int page_size, int slot_size) {
 int fixed_len_page_capacity(Page *page) {
     return page->num_records;
 }
+
 int fixed_len_page_freeslots(Page *page) {
     // Track how many bits we've explored (max of number of page records)
     int count = 0;
@@ -92,6 +93,45 @@ int fixed_len_page_freeslots(Page *page) {
     }
     return page->num_records - num_used_slots;
 }
-int add_fixed_len_page(Page *page, Record *r);
-void write_fixed_len_page(Page *page, int slot, Record *r);
-void read_fixed_len_page(Page *page, int slot, Record *r);
+
+int find_first_free_slot(Page *page) {
+    // Track how many bits we've explored (max of number of page records)
+    int count = 0;
+    // Iterate through the directory by char size bytes
+    int char_count = 0;
+    void *dir_start = page->directory;
+    dir_start = (dir_start + sizeof(int));
+    // Iterate through directory starting from free/occupied bits sector
+    while (count < page->num_records) {
+        char cur_char = *((char *)(dir_start + sizeof(char) * char_count));
+        /* cout << chartobin(cur_char) << endl; */
+        int char_bits = 0;
+        while (char_bits < sizeof(char) && count < page->num_records) {
+            if (!(cur_char & 0x1)) return count;
+            cur_char = cur_char / 2;
+            char_bits++;
+            count++;
+        }
+        char_count++;
+    }
+    return -1;
+}
+
+int add_fixed_len_page(Page *page, Record *r) {
+    if (fixed_len_page_freeslots(page) == 0) return -1;
+
+    int free_slot = find_first_free_slot(page);
+
+    write_fixed_len_page(page, free_slot, r);
+
+    return free_slot;
+}
+
+void write_fixed_len_page(Page *page, int slot, Record *r) {
+    void *slot_start = (page->data + page->slot_size*(slot));
+    fixed_len_write(r, slot_start);
+}
+void read_fixed_len_page(Page *page, int slot, Record *r) {
+    void *slot_start = (page->data + page->slot_size*(slot));
+    fixed_len_read(slot_start, page->slot_size, r);
+}
