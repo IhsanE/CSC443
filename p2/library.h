@@ -7,6 +7,7 @@ typedef struct {
     void *directory;
     int page_size;
     int slot_size;
+    int num_records;
 } Page;
 const int ATTR_SIZE = 10;
 
