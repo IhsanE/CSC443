@@ -25,24 +25,42 @@ int main(int argc, const char * argv[]) {
 
     // Open the page file for writing
     std::ofstream page_file;
-    page_file.open(page_file_name, std::ios::out | std::ios::binary);
+    page_file.open(page_file_name);
 
     // Read the CSV file line-by-line:
     std::ifstream csv_file(csv_file_name);
     std::string record;
     std::string record_copy;
 
+    int num_pages = 0;
+    Page *page = (Page *)malloc(sizeof(Page));
+
     while (std::getline(csv_file, record)) {
-        record_copy = record;
         Record r = Record();
-        std::stringstream ss(record_copy);
+        std::stringstream ss(record);
         std::string record_attr;
         while (std::getline(ss, record_attr, ',')) {
             r.push_back(const_cast<char*>(record_attr.c_str()));
-            cout << const_cast<char*>(record_attr.c_str()) << endl;
         }
-
+        if (num_pages == 0) {
+            init_fixed_len_page(page,  page_size, fixed_len_sizeof(&r));
+            num_pages++;
+        }
+        int page_full = add_fixed_len_page(page, &r);
+        cout << "page full: " << page_full << endl;
+        if (page_full == -1) {
+            cout << "new page because old one is full" << endl;
+            page_file.write((const char *) page->data, page->page_size);
+            init_fixed_len_page(page,  page_size, fixed_len_sizeof(&r));
+            num_pages++;
+            add_fixed_len_page(page, &r);
+        }
     }
 
+    if (fixed_len_page_freeslots(page) > 0) {
+        page_file.write((const char *) page->data, page->page_size);
+    }
+
+    page_file.close();
     return 0;
 }
