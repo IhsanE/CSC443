@@ -40,16 +40,16 @@ int main(int argc, const char * argv[]) {
         std::stringstream ss(record);
         std::string record_attr;
         while (std::getline(ss, record_attr, ',')) {
-            r.push_back(const_cast<char*>(record_attr.c_str()));
+            char *record_copy = (char *) malloc(ATTR_SIZE + 1);
+            std::strncpy(record_copy, record_attr.c_str(), ATTR_SIZE + 1);
+            r.push_back(record_copy);
         }
         if (num_pages == 0) {
             init_fixed_len_page(page,  page_size, fixed_len_sizeof(&r));
             num_pages++;
         }
         int page_full = add_fixed_len_page(page, &r);
-        cout << "page full: " << page_full << endl;
         if (page_full == -1) {
-            cout << "new page because old one is full" << endl;
             page_file.write((const char *) page->data, page->page_size);
             init_fixed_len_page(page,  page_size, fixed_len_sizeof(&r));
             num_pages++;

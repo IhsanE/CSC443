@@ -81,7 +81,6 @@ int fixed_len_page_freeslots(Page *page) {
         }
         char_count++;
     }
-    cout << "num used slots : " << num_used_slots << endl;
     return page->num_records - num_used_slots;
 }
 
@@ -146,7 +145,6 @@ void write_fixed_len_page(Page *page, int slot, Record *r) {
     void *slot_start = (page->data + page->slot_size*(slot));
     fixed_len_write(r, slot_start);
     mark_slot_dirty(page, slot);
-    int free_slot = find_first_free_slot(page);
 }
 void read_fixed_len_page(Page *page, int slot, Record *r) {
     void *slot_start = (page->data + page->slot_size*(slot));
