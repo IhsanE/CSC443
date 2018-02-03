@@ -39,7 +39,6 @@ void fixed_len_read(void *buf, int size, Record *record) {
 }
 
 void init_fixed_len_page(Page *page, int page_size, int slot_size) {
-    free(page->data);
     page->data = malloc(page_size);
     page->page_size = page_size;
     page->slot_size = slot_size;
@@ -48,12 +47,12 @@ void init_fixed_len_page(Page *page, int page_size, int slot_size) {
 
     page->num_records = num_slots - 1;
 
-    void *directory_end = (page->data + sizeof(char)*page_size);
+    void *directory_end = ((char *)page->data + sizeof(char)*page_size);
     // init directory slot to all 0
     memset(page->data, 0, page_size);
 
     // init first int size bits to represent the number of slots in page
-    *((int*)(directory_end - sizeof(int))) = page->num_records;
+    *((int*)((int *)directory_end - sizeof(int))) = page->num_records;
     page->directory = directory_end;
 }
 
@@ -69,13 +68,13 @@ int fixed_len_page_freeslots(Page *page) {
     // Iterate through the directory by char size bytes
     int char_count = 1;
     void *dir_start = page->directory;
-    dir_start = (dir_start - sizeof(int));
+    dir_start = ((char *)dir_start - sizeof(int));
     // Iterate through directory starting from free/occupied bits sector
     while (count < page->num_records) {
-        char cur_char = *((char * )(dir_start - sizeof(char) * char_count));
+        char cur_char = *((char * )((char *)dir_start - sizeof(char) * char_count));
         int char_bits = 0;
         while (char_bits < sizeof(char) && count < page->num_records) {
-            if (cur_char & 0x1 == 1) num_used_slots++;
+            if ((cur_char & 0x1) == 1) num_used_slots++;
             cur_char = cur_char / 2;
             char_bits++;
             count++;
@@ -91,10 +90,10 @@ int find_first_free_slot(Page *page) {
     // Iterate through the directory by char size bytes
     int char_count = 1;
     void *dir_start = page->directory;
-    dir_start = (dir_start - sizeof(int));
+    dir_start = ((char *)dir_start - sizeof(int));
     // Iterate through directory starting from free/occupied bits sector
     while (count < page->num_records) {
-        char cur_char = *((char *)(dir_start - sizeof(char) * char_count));
+        char cur_char = *((char *)((char *)dir_start - sizeof(char) * char_count));
         int char_bits = 0;
         while (char_bits < sizeof(char) && count < page->num_records) {
             if (!(cur_char & 0x1)) return count;
@@ -113,14 +112,14 @@ int mark_slot_dirty(Page *page, int slot_num) {
     // Iterate through the directory by char size bytes
     int char_count = 1;
     void *dir_start = page->directory;
-    dir_start = (dir_start - sizeof(int));
+    dir_start = ((char *)dir_start - sizeof(int));
     // Iterate through directory starting from free/occupied bits sector
     while (count < page->num_records) {
-        char cur_char = *((char *)(dir_start - sizeof(char) * char_count));
+        char cur_char = *((char *)((char *)dir_start - sizeof(char) * char_count));
         int char_bits = 0;
         while (char_bits < sizeof(char) && count < page->num_records) {
             if (count == slot_num)  {
-                *((char *)(dir_start - sizeof(char) * char_count)) |= 0x1;
+                *((char *)((char *)dir_start - sizeof(char) * char_count)) |= 0x1;
                 return 0;
             }
             cur_char = cur_char / 2;
@@ -138,14 +137,14 @@ int is_slot_used(Page *page, int slot_num) {
     // Iterate through the directory by char size bytes
     int char_count = 1;
     void *dir_start = page->directory;
-    dir_start = (dir_start - sizeof(int));
+    dir_start = ((char *)dir_start - sizeof(int));
     // Iterate through directory starting from free/occupied bits sector
     while (count < page->num_records) {
-        char cur_char = *((char *)(dir_start - sizeof(char) * char_count));
+        char cur_char = *((char *)((char *)dir_start - sizeof(char) * char_count));
         int char_bits = 0;
         while (char_bits < sizeof(char) && count < page->num_records) {
             if (count == slot_num)  {
-                return *((char *)(dir_start - sizeof(char) * char_count)) & 0x1;
+                return *((char *)((char *)dir_start - sizeof(char) * char_count)) & 0x1;
             }
             cur_char = cur_char / 2;
             char_bits++;
@@ -167,11 +166,11 @@ int add_fixed_len_page(Page *page, Record *r) {
 }
 
 void write_fixed_len_page(Page *page, int slot, Record *r) {
-    void *slot_start = (page->data + page->slot_size*(slot));
+    void *slot_start = ((char *)page->data + page->slot_size*(slot));
     fixed_len_write(r, slot_start);
     mark_slot_dirty(page, slot);
 }
 void read_fixed_len_page(Page *page, int slot, Record *r) {
-    void *slot_start = (page->data + page->slot_size*(slot));
+    void *slot_start = ((char *)page->data + page->slot_size*(slot));
     fixed_len_read(slot_start, page->slot_size, r);
 }
