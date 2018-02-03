@@ -28,14 +28,27 @@ int main(int argc, const char * argv[]) {
     page_file.open(page_file_name, ios::in | ios::binary);
 
     Page *page;
+    int num_pages = 0;
+    int num_records = 0;
+
+    struct timeb t;
+    ftime(&t);
+    unsigned long start_ms = t.time * 1000 + t.millitm;
 
     while (!page_file.eof()) {
-        cout << "HI" << endl;
         page = (Page *)malloc(sizeof(Page));
+        num_pages++;
 
         init_fixed_len_page(page, page_size, NUM_ATTR*ATTR_SIZE);
 
-        page_file.read((char *) page->data, page_size);
+        while (fixed_len_page_freeslots(page) > 0) {
+            Record temp_r;
+            char *record_buffer = (char *) malloc(NUM_ATTR*ATTR_SIZE + 1);
+            page_file.read(record_buffer, (NUM_ATTR*ATTR_SIZE));
+            fixed_len_read(record_buffer, NUM_ATTR*ATTR_SIZE, &temp_r);
+            add_fixed_len_page(page, &temp_r);
+            num_records++;
+        }
 
         for (int slot = 0; slot < fixed_len_page_capacity(page); slot++) {
             Record r;
@@ -53,7 +66,12 @@ int main(int argc, const char * argv[]) {
 
     page_file.close();
 
-    /* cout << "TIME: " << stop_ms - start_ms << " milliseconds" << endl; */
+	ftime(&t);
+    unsigned long stop_ms = t.time * 1000 + t.millitm;
+
+    cout << "NUMBER OF RECORDS: " << num_records << endl;
+    cout << "NUMBER OF PAGES: " << num_pages << endl;
+    cout << "TIME: " << stop_ms - start_ms << " milliseconds" << endl;
 
     return 0;
 }

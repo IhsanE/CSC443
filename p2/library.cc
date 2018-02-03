@@ -30,8 +30,9 @@ void fixed_len_read(void *buf, int size, Record *record) {
     // Create a temp char buffer to read bytes into
     // Add this buffer to our record vector
     for (int i = 0; i < size/ATTR_SIZE; i++) {
-        char* temp_record_buff = new char[size];
+        char* temp_record_buff = new char[ATTR_SIZE + 1];
         memcpy(temp_record_buff, buff_reference, ATTR_SIZE);
+        temp_record_buff[ATTR_SIZE] = '\0';
         (*record).push_back(temp_record_buff);
         buff_reference = (char *)buff_reference + ATTR_SIZE;
     }
