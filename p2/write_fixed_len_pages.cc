@@ -33,7 +33,12 @@ int main(int argc, const char * argv[]) {
     std::string record_copy;
 
     int num_pages = 0;
+    int num_records = 0;
     Page *page = (Page *)malloc(sizeof(Page));
+
+    struct timeb t;
+    ftime(&t);
+    unsigned long start_ms = t.time * 1000 + t.millitm;
 
     while (std::getline(csv_file, record)) {
         Record r = Record();
@@ -49,6 +54,7 @@ int main(int argc, const char * argv[]) {
             num_pages++;
         }
         int page_full = add_fixed_len_page(page, &r);
+        num_records++;
         if (page_full == -1) {
             page_file.write((const char *) page->data, page->page_size);
             init_fixed_len_page(page,  page_size, fixed_len_sizeof(&r));
@@ -62,5 +68,13 @@ int main(int argc, const char * argv[]) {
     }
 
     page_file.close();
+
+	ftime(&t);
+    unsigned long stop_ms = t.time * 1000 + t.millitm;
+
+    cout << "NUMBER OF RECORDS: " << num_records << endl;
+    cout << "NUMBER OF PAGES: " << num_pages << endl;
+    cout << "TIME: " << stop_ms - start_ms << " milliseconds" << endl;
+
     return 0;
 }
