@@ -72,7 +72,7 @@ int fixed_len_page_freeslots(Page *page) {
     // Iterate through directory starting from free/occupied bits sector
     while (count < page->num_records) {
         char cur_char = *((char * )((char *)dir_start - sizeof(char) * char_count));
-        int char_bits = 0;
+        unsigned int char_bits = 0;
         while (char_bits < sizeof(char) && count < page->num_records) {
             if ((cur_char & 0x1) == 1) num_used_slots++;
             cur_char = cur_char / 2;
@@ -94,7 +94,7 @@ int find_first_free_slot(Page *page) {
     // Iterate through directory starting from free/occupied bits sector
     while (count < page->num_records) {
         char cur_char = *((char *)((char *)dir_start - sizeof(char) * char_count));
-        int char_bits = 0;
+        unsigned int char_bits = 0;
         while (char_bits < sizeof(char) && count < page->num_records) {
             if (!(cur_char & 0x1)) return count;
             cur_char = cur_char / 2;
@@ -116,7 +116,7 @@ int mark_slot_dirty(Page *page, int slot_num) {
     // Iterate through directory starting from free/occupied bits sector
     while (count < page->num_records) {
         char cur_char = *((char *)((char *)dir_start - sizeof(char) * char_count));
-        int char_bits = 0;
+        unsigned int char_bits = 0;
         while (char_bits < sizeof(char) && count < page->num_records) {
             if (count == slot_num)  {
                 *((char *)((char *)dir_start - sizeof(char) * char_count)) |= 0x1;
@@ -141,7 +141,7 @@ int is_slot_used(Page *page, int slot_num) {
     // Iterate through directory starting from free/occupied bits sector
     while (count < page->num_records) {
         char cur_char = *((char *)((char *)dir_start - sizeof(char) * char_count));
-        int char_bits = 0;
+        unsigned int char_bits = 0;
         while (char_bits < sizeof(char) && count < page->num_records) {
             if (count == slot_num)  {
                 return *((char *)((char *)dir_start - sizeof(char) * char_count)) & 0x1;
