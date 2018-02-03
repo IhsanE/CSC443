@@ -56,7 +56,11 @@ int main(int argc, const char * argv[]) {
         int page_full = add_fixed_len_page(page, &r);
         num_records++;
         if (page_full == -1) {
-            page_file.write((const char *) page->data, page->page_size - fixed_len_sizeof(&r));
+            for (int i = 0; i < page->num_records; i++) {
+                if (is_slot_used(page, i)) {
+                    page_file.write((const char *) (page->data + fixed_len_sizeof(&r)*i), fixed_len_sizeof(&r));
+                }
+            }
             init_fixed_len_page(page,  page_size, fixed_len_sizeof(&r));
             num_pages++;
             add_fixed_len_page(page, &r);
@@ -64,7 +68,11 @@ int main(int argc, const char * argv[]) {
     }
 
     if (fixed_len_page_freeslots(page) > 0) {
-        page_file.write((const char *) page->data, page->page_size);
+        for (int i = 0; i < page->num_records; i++) {
+            if (is_slot_used(page, i)) {
+                page_file.write((const char *) (page->data + NUM_ATTR*ATTR_SIZE*i), NUM_ATTR*ATTR_SIZE);
+            }
+        }
     }
 
     page_file.close();

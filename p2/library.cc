@@ -132,6 +132,30 @@ int mark_slot_dirty(Page *page, int slot_num) {
     return -1;
 }
 
+int is_slot_used(Page *page, int slot_num) {
+    // Track how many bits we've explored (max of number of page records)
+    int count = 0;
+    // Iterate through the directory by char size bytes
+    int char_count = 1;
+    void *dir_start = page->directory;
+    dir_start = (dir_start - sizeof(int));
+    // Iterate through directory starting from free/occupied bits sector
+    while (count < page->num_records) {
+        char cur_char = *((char *)(dir_start - sizeof(char) * char_count));
+        int char_bits = 0;
+        while (char_bits < sizeof(char) && count < page->num_records) {
+            if (count == slot_num)  {
+                return *((char *)(dir_start - sizeof(char) * char_count)) & 0x1;
+            }
+            cur_char = cur_char / 2;
+            char_bits++;
+            count++;
+        }
+        char_count++;
+    }
+    return -1;
+}
+
 int add_fixed_len_page(Page *page, Record *r) {
     if (fixed_len_page_freeslots(page) == 0) return -1;
 

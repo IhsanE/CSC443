@@ -22,3 +22,4 @@ int fixed_len_page_freeslots(Page *page);
 int add_fixed_len_page(Page *page, Record *r);
 void write_fixed_len_page(Page *page, int slot, Record *r);
 void read_fixed_len_page(Page *page, int slot, Record *r);
+int is_slot_used(Page *page, int slot_num);
