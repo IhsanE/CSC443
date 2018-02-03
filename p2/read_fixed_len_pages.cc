@@ -41,26 +41,31 @@ int main(int argc, const char * argv[]) {
 
         init_fixed_len_page(page, page_size, NUM_ATTR*ATTR_SIZE);
 
-        while (fixed_len_page_freeslots(page) > 0) {
+        while (fixed_len_page_freeslots(page) > 0 && !page_file.eof()) {
             Record temp_r;
             char *record_buffer = (char *) malloc(NUM_ATTR*ATTR_SIZE + 1);
             page_file.read(record_buffer, (NUM_ATTR*ATTR_SIZE));
+            cout << "START OF RECORD BUFFER" << endl;
+            cout << record_buffer << endl;
+            cout << "END OF RECORD BUFFER" << endl;
             fixed_len_read(record_buffer, NUM_ATTR*ATTR_SIZE, &temp_r);
             add_fixed_len_page(page, &temp_r);
             num_records++;
+            free(record_buffer);
         }
 
-        for (int slot = 0; slot < fixed_len_page_capacity(page); slot++) {
-            Record r;
-            read_fixed_len_page(page, slot, &r);
-            for (Record::iterator iter = (r).begin(); iter != (r).end(); iter++) {
-                if (r.end() - iter == 1) {
-                    cout << *iter << endl;
-                } else {
-                    cout << *iter << ",";
-                }
-            }
-        }
+        /* for (int slot = 0; slot < fixed_len_page_capacity(page); slot++) { */
+        /*     Record r; */
+        /*     read_fixed_len_page(page, slot, &r); */
+        /*     for (Record::iterator iter = (r).begin(); iter != (r).end(); iter++) { */
+        /*         if (r.end() - iter == 1) { */
+        /*             cout << *iter << endl; */
+        /*         } else { */
+        /*             cout << *iter << ","; */
+        /*         } */
+        /*     } */
+        /* } */
+        free(page->data);
         free(page);
     }
 
