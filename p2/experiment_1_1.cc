@@ -17,6 +17,7 @@ int main () {
     }
     cout << "Original Record:\n" << endl;
     for (Record::iterator iter = (r).begin(); iter != (r).end(); iter++) {
+        cout << r.end() - iter;
         cout << *iter << " ";
     }
     int size = fixed_len_sizeof(&r);

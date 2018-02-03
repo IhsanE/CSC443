@@ -6,6 +6,7 @@
 #include <iterator>
 #include <fstream>
 #include <sstream>
+#include <istream>
 #include <sys/timeb.h>
 #include <cstring>
 #include "library.h"
@@ -15,41 +16,44 @@ using namespace std;
 
 
 int main(int argc, const char * argv[]) {
-    if (argc < 4) {
+    if (argc < 3) {
         cout << "Usage: write_fixed_len_pages <page_file> <page_size>" << endl;
         return 1;
     }
-    std::string page_file_name(argv[1]);
-    int page_size = std::stoi(argv[3]);
+    string page_file_name(argv[1]);
+    int page_size = stoi(argv[2]);
 
     // Open the page file for reading
-    std::ofstream page_file;
-    page_file.open(page_file_name);
+    ifstream page_file;
+    page_file.open(page_file_name, ios::in | ios::binary);
 
-    // Read the CSV file line-by-line:
-    std::string record;
-    std::string record_copy;
-
-    int num_pages = 0;
-    int num_records = 0;
-    Page *page = (Page *)malloc(sizeof(Page));
-
+    Page *page;
 
     while (!page_file.eof()) {
+        cout << "HI" << endl;
+        page = (Page *)malloc(sizeof(Page));
+
         init_fixed_len_page(page, page_size, NUM_ATTR*ATTR_SIZE);
 
         page_file.read((char *) page->data, page_size);
-    }
 
-    if (fixed_len_page_freeslots(page) > 0) {
-        page_file.write((const char *) page->data, page->page_size);
+        for (int slot = 0; slot < fixed_len_page_capacity(page); slot++) {
+            Record r;
+            read_fixed_len_page(page, slot, &r);
+            for (Record::iterator iter = (r).begin(); iter != (r).end(); iter++) {
+                if (r.end() - iter == 1) {
+                    cout << *iter << endl;
+                } else {
+                    cout << *iter << ",";
+                }
+            }
+        }
+        free(page);
     }
 
     page_file.close();
 
-    cout << "NUMBER OF RECORDS: " << num_records << endl;
-    cout << "NUMBER OF PAGES: " << num_pages << endl;
-    cout << "TIME: " << stop_ms - start_ms << " milliseconds" << endl;
+    /* cout << "TIME: " << stop_ms - start_ms << " milliseconds" << endl; */
 
     return 0;
 }
