@@ -13,6 +13,9 @@ experiment_2_2: experiment_2_2.cc library.o
 write_fixed_len_pages: write_fixed_len_pages.cc library.o
 	$(CC) $(FLAGS) -o $@ $< library.o
 
+read_fixed_len_pages: read_fixed_len_pages.cc library.o
+	$(CC) $(FLAGS) -o $@ $< library.o
+
 csv2heapfile: csv2heapfile.cc library.o
 	$(CC) $(FLAGS) -o $@ $< library.o
 

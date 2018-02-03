@@ -10,6 +10,7 @@ typedef struct {
     int num_records;
 } Page;
 const int ATTR_SIZE = 10;
+const int NUM_ATTR = 100;
 
 int fixed_len_sizeof(Record *record);
 int find_first_free_slot(Page *page);
