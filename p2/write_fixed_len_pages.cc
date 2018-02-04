@@ -57,19 +57,20 @@ int main(int argc, const char * argv[]) {
         num_records++;
         if (page_full == -1) {
             for (int i = 0; i < page->num_records; i++) {
-                if (is_slot_used(page, i)) {
+                if (!is_slot_free(page, i)) {
                     page_file.write((const char *) ((char *)page->data + fixed_len_sizeof(&r)*i), fixed_len_sizeof(&r));
                 }
             }
+            free(page->data);
             init_fixed_len_page(page,  page_size, fixed_len_sizeof(&r));
             num_pages++;
             add_fixed_len_page(page, &r);
         }
     }
 
-    if (fixed_len_page_freeslots(page) > 0) {
-        for (int i = 0; i < page->num_records; i++) {
-            if (is_slot_used(page, i)) {
+    if (fixed_len_page_freeslots(page) >= 0) {
+        for (int i = 0; i < num_records; i++) {
+            if (!is_slot_free(page, i)) {
                 page_file.write((const char *) ((char *)page->data + NUM_ATTR*ATTR_SIZE*i), NUM_ATTR*ATTR_SIZE);
             }
         }
@@ -77,7 +78,7 @@ int main(int argc, const char * argv[]) {
 
     page_file.close();
 
-	ftime(&t);
+    ftime(&t);
     unsigned long stop_ms = t.time * 1000 + t.millitm;
 
     cout << "NUMBER OF RECORDS: " << num_records << endl;
